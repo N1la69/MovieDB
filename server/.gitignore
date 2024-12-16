@@ -1,0 +1,23 @@
+# Node modules
+node_modules/
+
+# TypeScript build output
+dist/
+
+# Log files
+*.log
+
+# Environment variables
+.env
+
+# Debugger configuration files
+.vscode/
+
+# npm package lock
+package-lock.json
+
+# IDE files
+.idea/
+
+# TyepeScript source maps
+*.tsbuildinfo
