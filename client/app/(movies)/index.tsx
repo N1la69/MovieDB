@@ -1,11 +1,11 @@
 import { View, Text } from "react-native";
 
-const AuthScreen = () => {
+const Movie = () => {
   return (
     <View>
-      <Text>Auth Screen</Text>
+      <Text>Movie List Screen</Text>
     </View>
   );
 };
 
-export default AuthScreen;
+export default Movie;
