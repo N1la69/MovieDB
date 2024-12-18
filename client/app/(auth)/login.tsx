@@ -44,7 +44,7 @@ const Login = () => {
           placeholder="Password"
           value={password}
           onChangeText={setPassword}
-          className=""
+          className="w-full bg-transparent"
         />
       </View>
 
