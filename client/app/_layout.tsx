@@ -1,4 +1,4 @@
-import { router, SplashScreen, Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 

@@ -1,7 +1,8 @@
 import { useAuth } from "@/hooks/useAuth";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Text, TextInput, TouchableOpacity } from "react-native";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Register = () => {
@@ -22,36 +23,45 @@ const Register = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 items-center justify-center p-4 bg-slate-100">
+    <SafeAreaView className="flex-1 items-center justify-center p-4">
       <Text className="text-4xl font-bold mb-2">Welcome to MovieDB</Text>
       <Text className="text-2xl font-semibold mb-4 text-center">
         Please enter your details to register with us
       </Text>
 
-      <TextInput
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-        className="border border-gray-500 w-full py-2 px-4 mb-4 rounded-md"
-      />
+      <View className="flex flex-row items-center w-full gap-2 border border-gray-500 py-1 px-4 rounded-md mb-4">
+        <Ionicons name="person" size={24} color="black" />
+        <TextInput
+          placeholder="Name"
+          value={name}
+          onChangeText={setName}
+          className=""
+        />
+      </View>
 
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        className="border border-gray-500 w-full py-2 px-4 mb-4 rounded-md"
-      />
+      <View className="flex flex-row items-center w-full gap-2 border border-gray-500 py-1 px-4 rounded-md mb-4">
+        <Ionicons name="mail" size={24} color="black" />
+        <TextInput
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          className=""
+        />
+      </View>
 
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        className="border border-gray-500 w-full py-2 px-4 mb-4 rounded-md"
-      />
+      <View className="flex flex-row items-center w-full gap-2 border border-gray-500 py-1 px-4 rounded-md mb-4">
+        <Ionicons name="lock-closed" size={24} color="black" />
+        <TextInput
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          className=""
+        />
+      </View>
 
       <TouchableOpacity
         onPress={handleregister}
-        className="bg-blue-500 px-4 py-2 rounded mb-4"
+        className="bg-blue-500 px-4 py-2 rounded mb-4 mt-3"
       >
         <Text className="text-white font-bold text-xl">Register</Text>
       </TouchableOpacity>
