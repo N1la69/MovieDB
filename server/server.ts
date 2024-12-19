@@ -4,7 +4,7 @@ import cors from "cors";
 import connectDB from "./config/db";
 
 import authRoutes from "./routes/authRoutes";
-//import movieRoutes from "./routes/movieRoutes";
+import movieRoutes from "./routes/movieRoutes";
 
 dotenv.config();
 connectDB();
@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
 app.use("/api/auth", authRoutes);
-//app.use("/api/movies", movieRoutes);
+app.use("/api/movies", movieRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
