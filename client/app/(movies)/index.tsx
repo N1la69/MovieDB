@@ -1,3 +1,4 @@
+import AddMovie from "@/components/AddMovie";
 import Header from "@/components/Header";
 import { styles } from "@/styles/Style";
 import { View, Text } from "react-native";
@@ -9,6 +10,7 @@ const Movie = () => {
       <Header />
       <View>
         <Text>Movie List Screen</Text>
+        <AddMovie />
       </View>
     </SafeAreaView>
   );

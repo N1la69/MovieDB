@@ -5,4 +5,10 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#D5E4F1",
   },
+  SearchBarStyle: {
+    backgroundColor: "white",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
 });

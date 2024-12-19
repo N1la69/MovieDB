@@ -1,3 +1,4 @@
+import AddMovie from "@/components/AddMovie";
 import Header from "@/components/Header";
 import { styles } from "@/styles/Style";
 import { Text, View } from "react-native";
@@ -9,6 +10,7 @@ const Home = () => {
       <Header />
       <View className="text-center flex-1 items-center justify-center">
         <Text className="text-3xl text-red-500">Welcome to Home Screen</Text>
+        <AddMovie />
       </View>
     </SafeAreaView>
   );

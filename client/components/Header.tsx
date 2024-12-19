@@ -1,19 +1,18 @@
 import { View, Text, StyleSheet } from "react-native";
 
 import { useAuth } from "@/hooks/useAuth";
+import SearchBar from "./SearchBar";
 
 export default function Header() {
   const { user } = useAuth();
   const username = user?.name || "Guest";
 
   return (
-    <View className="p-4 bg-blue-500 shadow-xl flex" style={styles.shadow}>
-      <Text className="text-2xl font-bold text-left text-white">
-        Hi {username},
+    <View className="p-4 bg-blue-500 shadow-xl" style={styles.shadow}>
+      <Text className="text-2xl font-bold text-left text-white mb-4">
+        Hi {username}, welcome to Movie DB
       </Text>
-      <Text className="text-xl font-semibold text-right text-white">
-        welcome to Movie DB
-      </Text>
+      <SearchBar />
     </View>
   );
 }
