@@ -69,3 +69,90 @@ export const getUserCollections = async (
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const deleteCollection = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { collectionId } = req.params;
+  const userId = req.body.userId;
+
+  if (!collectionId || !userId) {
+    res.status(400).json({ message: "Collection ID and User ID are required" });
+    return;
+  }
+
+  try {
+    const collection = await Collection.findById(collectionId);
+
+    if (!collection) {
+      res.status(404).json({ message: "Collection not found" });
+      return;
+    }
+
+    if (collection.userId.toString() !== userId) {
+      res
+        .status(403)
+        .json({ message: "Unauthorized to delete this collection" });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    user.collections = user.collections.filter(
+      (col) => col.toString() !== collectionId
+    );
+
+    await user.save();
+
+    await collection.deleteOne();
+
+    res.status(200).json({ message: "Collection deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const editCollection = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { collectionId, newName, userId } = req.body;
+
+  if (!collectionId || !newName || !userId) {
+    res
+      .status(400)
+      .json({ message: "Collection ID, new name, and User ID are required" });
+    return;
+  }
+
+  try {
+    const collection = await Collection.findById(collectionId);
+
+    if (!collection) {
+      res.status(404).json({ message: "Collection not found" });
+      return;
+    }
+
+    if (collection.userId.toString() !== userId) {
+      res
+        .status(403)
+        .json({ message: "You are not authorized to edit this collection" });
+      return;
+    }
+
+    collection.name = newName;
+
+    await collection.save();
+
+    res.status(200).json({ collection });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
