@@ -1,37 +1,16 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-// collections
-interface ICollection {
-  name: string;
-  years: number[];
-}
+import mongoose, { Schema, Document, Model } from "mongoose";
+//import Collection from "./Collection";
 
 // IUser interface
 export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  collections: ICollection[];
+  collections: mongoose.Types.ObjectId[];
 }
 
-// collections schema
-const CollectionSchema: Schema = new Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    years: {
-      type: [Number],
-      default: [],
-    },
-  },
-  { _id: false }
-);
-
 // User schema
-const UserSchema: Schema = new Schema(
+const UserSchema: Schema<IUser> = new Schema(
   {
     name: {
       type: String,
@@ -54,7 +33,7 @@ const UserSchema: Schema = new Schema(
       minlength: 6,
     },
     collections: {
-      type: [CollectionSchema],
+      type: [{ type: Schema.Types.ObjectId, ref: "Collection" }],
       default: [],
     },
   },
@@ -63,4 +42,7 @@ const UserSchema: Schema = new Schema(
   }
 );
 
-export default mongoose.model<IUser>("User", UserSchema);
+// User model
+const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
+
+export default User;

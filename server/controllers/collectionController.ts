@@ -1,5 +1,10 @@
 import { Request, Response } from "express";
 import User from "../models/User";
+import Collection from "../models/Collection";
+
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
 
 export const createCollection = async (
   req: Request,
@@ -20,13 +25,19 @@ export const createCollection = async (
       return;
     }
 
-    // Add the new collection to the user's collections
-    const newCollection = { name, years: [] };
-    user.collections.push(newCollection);
+    const newCollection = new Collection({
+      name,
+      userId,
+      years: [],
+    });
+
+    await newCollection.save();
+
+    user.collections.push(newCollection._id as any);
 
     await user.save();
 
-    res.status(201).json({ collections: newCollection });
+    res.status(201).json({ collection: newCollection });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -34,18 +45,18 @@ export const createCollection = async (
 };
 
 export const getUserCollections = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  const userId = req.params.userId;
+  const userId = req.user?.id;
 
   if (!userId) {
-    res.status(400).json({ message: "User ID is required" });
+    res.status(401).json({ message: "User not authenticated" });
     return;
   }
 
   try {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).populate("collections");
 
     if (!user) {
       res.status(404).json({ message: "User not found" });

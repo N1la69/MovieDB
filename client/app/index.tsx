@@ -48,23 +48,26 @@ const Home = () => {
   const handleCreateCollection = async () => {
     if (newCollectionName.trim()) {
       try {
-        const response = await api.post(
-          "/api/movies/collections/addCollection",
-          {
+        if (user?.id) {
+          console.log(user?.id);
+          const response = await api.post("/movies/collections/addCollection", {
             name: newCollectionName,
             userId: user?.id,
-          }
+          });
+
+          setCollections((prevCollections): any => [
+            ...prevCollections,
+            response.data.collection,
+          ]);
+
+          setNewCollectionName("");
+          setIsCreating(false);
+        }
+      } catch (error: any) {
+        console.error(
+          "Failed to create collection:",
+          error.response?.data || error
         );
-
-        setCollections((prevCollections): any => [
-          ...prevCollections,
-          response.data.collection,
-        ]);
-
-        setNewCollectionName("");
-        setIsCreating(false);
-      } catch (error) {
-        console.error("Failed to create collection (index):", error);
       }
     }
   };

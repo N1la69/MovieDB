@@ -1,4 +1,3 @@
-import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import User from "../models/User";
 
@@ -11,33 +10,26 @@ export const protectRoute = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const token = req.headers["authorization"]?.replace("Bearer ", "");
+  const userId = req.headers["userId"] || req.params.userId;
 
-  if (!token) {
-    res.status(401).json({ message: "No token, authorization denied" });
+  if (!userId) {
+    res.status(400).json({ message: "User ID is required" });
     return;
   }
 
   try {
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
-
-    req.user = decoded.user;
-
-    // Find the user by ID and make sure they exist
-    const user = await User.findById(req.user?.id);
+    const user = await User.findById(userId);
     if (!user) {
       res.status(403).json({ message: "User not found or unauthorized" });
       return;
     }
 
-    next(); // Proceed to the next middleware or route handler
-  } catch (error: any) {
+    req.user = user;
+
+    next();
+  } catch (error) {
     console.error(error);
-    if (error.name === "TokenExpiredError") {
-      res.status(401).json({ message: "Token expired, please log in again" });
-      return;
-    }
-    res.status(401).json({ message: "Token is not valid" });
+    res.status(500).json({ message: "Server error" });
     return;
   }
 };

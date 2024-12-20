@@ -14,7 +14,6 @@ export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Load user from AsyncStorage on app startup
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -32,14 +31,12 @@ export const useAuth = () => {
     loadUser();
   }, []);
 
-  // Login function
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
       const response = await api.post("/auth/login", { email, password });
       const loggedInUser = response.data.user;
 
-      // Save user to state and AsyncStorage
       setUser(loggedInUser);
       await AsyncStorage.setItem("user", JSON.stringify(loggedInUser));
       return true;
@@ -51,7 +48,6 @@ export const useAuth = () => {
     }
   };
 
-  // Register function
   const register = async (name: string, email: string, password: string) => {
     try {
       setLoading(true);
@@ -62,7 +58,6 @@ export const useAuth = () => {
       });
       const registeredUser = response.data.user;
 
-      // Save user to state and AsyncStorage
       setUser(registeredUser);
       await AsyncStorage.setItem("user", JSON.stringify(registeredUser));
       return true;
@@ -74,7 +69,6 @@ export const useAuth = () => {
     }
   };
 
-  // Logout function
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("user");

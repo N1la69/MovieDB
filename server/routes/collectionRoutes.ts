@@ -8,7 +8,7 @@ import { protectRoute } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
-router.post("/addCollection", protectRoute, createCollection);
+router.post("/addCollection", createCollection);
 router.get("/:userId", protectRoute, getUserCollections);
 
 export default router;
