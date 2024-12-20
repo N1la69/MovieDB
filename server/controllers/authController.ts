@@ -50,7 +50,7 @@ export const registerUser = async (
       },
     });
   } catch (error) {
-    console.error("Error registering user:", error);
+    console.error("Error registering user (authController):", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -89,7 +89,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error) {
-    console.error("Error logging in user:", error);
+    console.error("Error logging in user (authController):", error);
     res.status(500).json({ message: "Server error" });
   }
 };

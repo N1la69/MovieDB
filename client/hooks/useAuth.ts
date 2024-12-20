@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { useState, useEffect } from "react";
 
 type User = {
+  token: string;
   id: string;
   name: string;
   email: string;
@@ -43,7 +44,7 @@ export const useAuth = () => {
       await AsyncStorage.setItem("user", JSON.stringify(loggedInUser));
       return true;
     } catch (error: any) {
-      console.error("Error logging in:", error.message);
+      console.error("Error logging in (useAuth):", error.message);
       return false;
     } finally {
       setLoading(false);
@@ -66,7 +67,7 @@ export const useAuth = () => {
       await AsyncStorage.setItem("user", JSON.stringify(registeredUser));
       return true;
     } catch (error: any) {
-      console.error("Error registering:", error.message);
+      console.error("Error registering (useAuth):", error.message);
       return false;
     } finally {
       setLoading(false);

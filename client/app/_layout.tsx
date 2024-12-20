@@ -1,10 +1,11 @@
-import { router, Tabs, Slot } from "expo-router";
+import { router, Tabs, Slot, usePathname } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { Feather } from "@expo/vector-icons";
 import { View } from "react-native";
 
 import "../global.css";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const allowedIcons = ["home", "user", "search", "settings", "film"];
 
@@ -40,6 +41,7 @@ const TabIcon = ({
 
 export default function RootLayout() {
   const { user, loading } = useAuth();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading) {
@@ -55,66 +57,76 @@ export default function RootLayout() {
     return null;
   }
 
+  // Define routes where the tab bar should be hidden
+  const hideTabRoutes = ["/splash", "/(auth)/login", "/(auth)/register"];
+  const shouldHideTabs = hideTabRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
   return user ? (
-    <Tabs
-      initialRouteName="index"
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: "#fff",
-        tabBarInactiveTintColor: "#fff",
-        tabBarShowLabel: false,
-        tabBarStyle: {
-          backgroundColor: "#3b82f6",
-          borderRadius: 50,
-          paddingTop: 0,
-          paddingBottom: 25,
-          overflow: "hidden",
-          marginHorizontal: 20,
-          marginBottom: 15,
-          height: 70,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexDirection: "row",
-          position: "absolute",
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} source="home" />
-          ),
-        }}
-      />
+    <SafeAreaProvider>
+      {!shouldHideTabs && (
+        <Tabs
+          initialRouteName="index"
+          screenOptions={{
+            headerShown: false,
+            tabBarActiveTintColor: "#fff",
+            tabBarInactiveTintColor: "#fff",
+            tabBarShowLabel: false,
+            tabBarStyle: {
+              backgroundColor: "#3b82f6",
+              borderRadius: 50,
+              paddingTop: 0,
+              paddingBottom: 25,
+              overflow: "hidden",
+              marginHorizontal: 20,
+              marginBottom: 15,
+              height: 70,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexDirection: "row",
+              position: "absolute",
+            },
+          }}
+        >
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: "Home",
+              tabBarIcon: ({ focused }) => (
+                <TabIcon focused={focused} source="home" />
+              ),
+            }}
+          />
 
-      <Tabs.Screen
-        name="(movies)/index"
-        options={{
-          title: "Movies",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} source="film" />
-          ),
-        }}
-      />
+          <Tabs.Screen
+            name="(movies)/index"
+            options={{
+              title: "Movies",
+              tabBarIcon: ({ focused }) => (
+                <TabIcon focused={focused} source="film" />
+              ),
+            }}
+          />
 
-      <Tabs.Screen
-        name="(profile)/index"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} source="user" />
-          ),
-        }}
-      />
+          <Tabs.Screen
+            name="(profile)/index"
+            options={{
+              title: "Profile",
+              tabBarIcon: ({ focused }) => (
+                <TabIcon focused={focused} source="user" />
+              ),
+            }}
+          />
 
-      {/* Hide other routes like splash and (auth) */}
-      <Tabs.Screen name="splash" options={{ href: null }} />
-      <Tabs.Screen name="(auth)" options={{ href: null }} />
-      <Tabs.Screen name="(movies)/[id]" options={{ href: null }} />
-    </Tabs>
+          {/* Hide other routes like splash and (auth) */}
+          <Tabs.Screen name="splash" options={{ href: null }} />
+          <Tabs.Screen name="(auth)" options={{ href: null }} />
+          <Tabs.Screen name="(movies)/[id]" options={{ href: null }} />
+        </Tabs>
+      )}
+    </SafeAreaProvider>
   ) : (
     <Slot />
   );

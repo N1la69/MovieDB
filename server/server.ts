@@ -5,6 +5,7 @@ import connectDB from "./config/db";
 
 import authRoutes from "./routes/authRoutes";
 import movieRoutes from "./routes/movieRoutes";
+import collectionRoutes from "./routes/collectionRoutes";
 
 dotenv.config();
 connectDB();
@@ -21,6 +22,7 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
+app.use("/api/movies/collections", collectionRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

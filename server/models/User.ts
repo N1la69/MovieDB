@@ -1,11 +1,34 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-// User interface
+// collections
+interface ICollection {
+  name: string;
+  years: number[];
+}
+
+// IUser interface
 export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
+  collections: ICollection[];
 }
+
+// collections schema
+const CollectionSchema: Schema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    years: {
+      type: [Number],
+      default: [],
+    },
+  },
+  { _id: false }
+);
 
 // User schema
 const UserSchema: Schema = new Schema(
@@ -29,6 +52,10 @@ const UserSchema: Schema = new Schema(
       type: String,
       required: true,
       minlength: 6,
+    },
+    collections: {
+      type: [CollectionSchema],
+      default: [],
     },
   },
   {

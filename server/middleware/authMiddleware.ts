@@ -1,36 +1,43 @@
-import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { Request, Response, NextFunction } from "express";
+import User from "../models/User";
 
-const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
-
-interface UserPayload {
-  id: string;
-  email: string;
-  role?: string;
+interface AuthenticatedRequest extends Request {
+  user?: any;
 }
 
-interface RequestWithUser extends Request {
-  user?: UserPayload;
-}
-
-export const authMiddleware = (
-  req: RequestWithUser,
+export const protectRoute = async (
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-): void => {
-  const token = req.header("Authorization")?.split(" ")[1];
+): Promise<void> => {
+  const token = req.headers["authorization"]?.replace("Bearer ", "");
 
   if (!token) {
-    res.status(401).json({ error: "Access denied. No token provided." });
+    res.status(401).json({ message: "No token, authorization denied" });
     return;
   }
 
   try {
-    const decoded = jwt.verify(token, SECRET_KEY) as UserPayload;
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(400).json({ error: "Invalid token." });
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+
+    req.user = decoded.user;
+
+    // Find the user by ID and make sure they exist
+    const user = await User.findById(req.user?.id);
+    if (!user) {
+      res.status(403).json({ message: "User not found or unauthorized" });
+      return;
+    }
+
+    next(); // Proceed to the next middleware or route handler
+  } catch (error: any) {
+    console.error(error);
+    if (error.name === "TokenExpiredError") {
+      res.status(401).json({ message: "Token expired, please log in again" });
+      return;
+    }
+    res.status(401).json({ message: "Token is not valid" });
     return;
   }
 };
