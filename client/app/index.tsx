@@ -18,6 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const Home = () => {
   const { user } = useAuth();
+
   const [collections, setCollections] = useState<any[]>([]);
   const [newCollectionName, setNewCollectionName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -25,6 +26,7 @@ const Home = () => {
     null
   );
   const [newCollectionNameForEdit, setNewCollectionNameForEdit] = useState("");
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCollections = async () => {
@@ -156,7 +158,7 @@ const Home = () => {
       >
         <View className="px-3 py-2">
           {collections.length === 0 ? (
-            <Text className="text-gray-500 mb-4 text-center">
+            <Text className="text-gray-500 mb-4 text-center pt-10">
               You currently have no collections, create a collection.
             </Text>
           ) : (
@@ -165,51 +167,69 @@ const Home = () => {
               keyExtractor={(item: any) => item._id + "1"}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  className="p-4 mb-2 bg-gray-100 rounded-lg"
+                  className="p-4 pt-6 mb-2 bg-gray-100 rounded-lg"
                   onPress={() =>
                     console.log("Navigate to collection", item.name)
                   } // Navigation logic Left
                 >
-                  <Text className="text-gray-800 text-2xl font-bold mb-3">
-                    {item.name}
-                  </Text>
+                  <View className="relative">
+                    <Text className="text-gray-800 text-2xl font-bold mb-3">
+                      {item.name}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() =>
+                        setActiveDropdown(
+                          activeDropdown === item._id ? null : item._id
+                        )
+                      }
+                      className="absolute right-3 top-1"
+                    >
+                      <Ionicons
+                        name="settings-outline"
+                        size={24}
+                        color="black"
+                      />
+                    </TouchableOpacity>
+                  </View>
 
                   {/* Calender Years */}
 
-                  <View className="flex justify-between items-center gap-3">
-                    <TouchableOpacity
-                      onPress={() => console.log("Add year to", item.name)} // Year logic left
-                      style={styles.NormalButtonStyle}
-                    >
-                      <Ionicons name="add" size={24} color="white" />
-                      <Text className="text-white ml-2 text-lg text-semibold">
-                        Add Calendar Year
-                      </Text>
-                    </TouchableOpacity>
+                  {activeDropdown === item._id && (
+                    <View className="flex justify-between items-center gap-3">
+                      <TouchableOpacity
+                        onPress={() => console.log("Add year to", item.name)} // Year logic left
+                        style={styles.NormalButtonStyle}
+                      >
+                        <Ionicons name="add" size={24} color="white" />
+                        <Text className="text-white ml-2 text-lg text-semibold">
+                          Add Calendar Year
+                        </Text>
+                      </TouchableOpacity>
 
-                    <TouchableOpacity
-                      onPress={() => {
-                        setEditingCollectionId(item._id);
-                        setNewCollectionNameForEdit(item.name);
-                      }}
-                      style={styles.NeutralButtonStyle}
-                    >
-                      <Ionicons name="create" size={24} color="white" />
-                      <Text className="text-white ml-2 text-lg text-semibold">
-                        Edit Collection Name
-                      </Text>
-                    </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setEditingCollectionId(item._id);
+                          setNewCollectionNameForEdit(item.name);
+                        }}
+                        style={styles.NeutralButtonStyle}
+                      >
+                        <Ionicons name="create" size={24} color="white" />
+                        <Text className="text-white ml-2 text-lg text-semibold">
+                          Edit Collection Name
+                        </Text>
+                      </TouchableOpacity>
 
-                    <TouchableOpacity
-                      onPress={() => handleDeleteCollection(item._id)}
-                      style={styles.CancelButtonStyle}
-                    >
-                      <Ionicons name="trash" size={24} color="white" />
-                      <Text className="text-white ml-2 text-lg text-semibold">
-                        Delete Collection
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                      <TouchableOpacity
+                        onPress={() => handleDeleteCollection(item._id)}
+                        style={styles.CancelButtonStyle}
+                      >
+                        <Ionicons name="trash" size={24} color="white" />
+                        <Text className="text-white ml-2 text-lg text-semibold">
+                          Delete Collection
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </TouchableOpacity>
               )}
             />
