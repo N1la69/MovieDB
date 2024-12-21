@@ -19,6 +19,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const Home = () => {
   const { user } = useAuth();
 
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+  // COLLECTION STATES
   const [collections, setCollections] = useState<any[]>([]);
   const [newCollectionName, setNewCollectionName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -26,7 +29,9 @@ const Home = () => {
     null
   );
   const [newCollectionNameForEdit, setNewCollectionNameForEdit] = useState("");
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+  // YEAR STATES
+  const [years, setYears] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchCollections = async () => {
