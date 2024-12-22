@@ -23,8 +23,8 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
-app.use("/api/movies/collections", collectionRoutes);
-app.use("/api/movies/collections/years", yearRoutes);
+app.use("/api/collections", collectionRoutes);
+app.use("/api/years", yearRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

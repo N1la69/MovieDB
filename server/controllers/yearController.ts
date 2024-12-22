@@ -74,3 +74,71 @@ export const getCollectionYears = async (
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const editYear = async (req: Request, res: Response): Promise<void> => {
+  const { yearId, newYear } = req.body;
+
+  if (!yearId || !newYear) {
+    res.status(400).json({ message: "Year ID and new year are required" });
+    return;
+  }
+
+  try {
+    const year = await Year.findById(yearId);
+
+    if (!year) {
+      res.status(404).json({ message: "Year not found" });
+      return;
+    }
+
+    year.year = newYear;
+
+    await year.save();
+
+    res.status(200).json({ message: "Year updated successfully", year });
+  } catch (error) {
+    console.error("Error updating year:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const deleteYear = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { yearId, collectionId } = req.body;
+
+  if (!yearId || !collectionId) {
+    res.status(400).json({ message: "Year ID and Collection ID are required" });
+    return;
+  }
+
+  try {
+    const year = await Year.findById(yearId);
+
+    if (!year) {
+      res.status(404).json({ message: "Year not found" });
+      return;
+    }
+
+    const collection = await Collection.findById(collectionId);
+
+    if (!collection) {
+      res.status(404).json({ message: "Collection not found" });
+      return;
+    }
+
+    collection.years = collection.years.filter(
+      (yearId: any) => yearId.toString() !== yearId
+    );
+
+    await collection.save();
+
+    await Year.findByIdAndDelete(yearId);
+
+    res.status(200).json({ message: "Year deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting year:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
