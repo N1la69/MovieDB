@@ -4,6 +4,7 @@ import api from "@/lib/axios";
 import { styles } from "@/styles/Style";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
+import { BlurView } from "expo-blur";
 import {
   Button,
   FlatList,
@@ -13,6 +14,7 @@ import {
   View,
   Alert,
   ScrollView,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -25,6 +27,7 @@ const Home = () => {
   const [collections, setCollections] = useState<any[]>([]);
   const [newCollectionName, setNewCollectionName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [isEditingCollection, setIsEditingCollection] = useState(false);
   const [editingCollectionId, setEditingCollectionId] = useState<string | null>(
     null
   );
@@ -34,6 +37,7 @@ const Home = () => {
   const [years, setYears] = useState<{ [key: string]: any[] }>({});
   const [editingYearId, setEditingYearId] = useState<string | null>(null);
   const [newYearNameForEdit, setNewYearNameForEdit] = useState("");
+  const [isEditingYear, setIsEditingYear] = useState(false);
 
   // COLLECTION FUNCTIONS
   useEffect(() => {
@@ -218,7 +222,7 @@ const Home = () => {
       try {
         const response = await api.put(`/years/${editingYearId}`, {
           yearId: editingYearId,
-          newYearName: newYearNameForEdit,
+          newYear: newYearNameForEdit,
           collectionId: activeDropdown,
           userId: user?.id,
         });
@@ -309,6 +313,7 @@ const Home = () => {
                                 </Text>
                                 <TouchableOpacity
                                   onPress={() => {
+                                    setIsEditingYear(true);
                                     setEditingYearId(yearItem._id);
                                     setNewYearNameForEdit(yearItem.year);
                                   }}
@@ -341,6 +346,7 @@ const Home = () => {
 
                         <TouchableOpacity
                           onPress={() => {
+                            setIsEditingCollection(true);
                             setEditingCollectionId(item._id);
                             setNewCollectionNameForEdit(item.name);
                           }}
@@ -369,123 +375,172 @@ const Home = () => {
             </View>
           )}
 
-          {!isCreating ? (
-            <TouchableOpacity
-              onPress={() => setIsCreating(true)}
-              style={styles.NormalButtonStyle}
+          <TouchableOpacity
+            onPress={() => setIsCreating(true)}
+            style={styles.NormalButtonStyle}
+          >
+            <Ionicons name="add" size={25} color="white" />
+            <Text className="text-white ml-2 text-lg text-semibold">
+              Create New Collection
+            </Text>
+          </TouchableOpacity>
+
+          {/* MODAL FOR CREATING COLLECTION */}
+          <Modal
+            visible={isCreating}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setIsCreating(false)}
+          >
+            <BlurView
+              intensity={100}
+              className="flex-1 justify-center items-center"
             >
-              <Ionicons name="add" size={25} color="white" />
-              <Text className="text-white ml-2 text-lg text-semibold">
-                Create New Collection
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <View className="mt-4">
-              <TextInput
-                placeholder="Enter collection name"
-                className="border p-2 rounded mb-2"
-                value={newCollectionName}
-                onChangeText={setNewCollectionName}
-              />
+              <View className="bg-blue-100 p-6 rounded-lg w-4/5 shadow-md">
+                <Text className="text-xl font-bold mb-4">
+                  Create Collection
+                </Text>
 
-              <View className="flex justify-between items-center gap-2">
-                <TouchableOpacity
-                  onPress={handleCreateCollection}
-                  style={styles.NormalButtonStyle}
-                >
-                  <Ionicons name="save" size={24} color="white" />
-                  <Text className="text-white ml-2 text-lg text-semibold">
-                    Save Collection
-                  </Text>
-                </TouchableOpacity>
+                <TextInput
+                  placeholder="Enter collection name"
+                  className="border border-gray-500 rounded px-4 py-2 mb-4"
+                  value={newCollectionName}
+                  onChangeText={setNewCollectionName}
+                />
 
-                <TouchableOpacity
-                  onPress={() => {
-                    setIsCreating(false);
-                    setNewCollectionName("");
-                  }}
-                  style={styles.CancelButtonStyle}
-                >
-                  <Ionicons name="close" size={24} color="white" />
-                  <Text className="text-white ml-2 text-lg text-semibold">
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
+                <View className="gap-2">
+                  <TouchableOpacity
+                    onPress={handleCreateCollection}
+                    style={styles.NormalButtonStyle}
+                  >
+                    <Ionicons name="save" size={24} color="white" />
+                    <Text className="text-white ml-2 text-lg font-semibold">
+                      Save Collection
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsCreating(false);
+                      setNewCollectionName("");
+                    }}
+                    style={styles.CancelButtonStyle}
+                  >
+                    <Ionicons name="close" size={24} color="white" />
+                    <Text className="text-white ml-2 text-lg font-semibold">
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          )}
+            </BlurView>
+          </Modal>
 
-          {editingCollectionId && (
-            <View className="mt-4 p-5">
-              <TextInput
-                placeholder="Edit collection name"
-                className="border p-2 rounded mb-2"
-                value={newCollectionNameForEdit}
-                onChangeText={setNewCollectionNameForEdit}
-              />
+          {/* MODAL FOR EDITING COLLECTION */}
+          <Modal
+            visible={isEditingCollection}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setIsEditingCollection(false)}
+          >
+            <BlurView
+              intensity={100}
+              className="flex-1 justify-center items-center"
+            >
+              <View className="bg-blue-100 p-6 rounded-lg w-4/5 shadow-md">
+                <Text className="text-xl font-bold mb-3">Edit Collection</Text>
 
-              <View className="flex justify-between items-center gap-2">
-                <TouchableOpacity
-                  onPress={handleEditCollection}
-                  style={styles.NormalButtonStyle}
-                >
-                  <Ionicons name="save" size={24} color="white" />
-                  <Text className="text-white ml-2 text-lg text-semibold">
-                    Save Changes
-                  </Text>
-                </TouchableOpacity>
+                <TextInput
+                  placeholder="Edit collection name"
+                  className="border p-2 rounded mb-4"
+                  value={newCollectionNameForEdit}
+                  onChangeText={setNewCollectionNameForEdit}
+                />
 
-                <TouchableOpacity
-                  onPress={() => {
-                    setEditingCollectionId(null);
-                    setNewCollectionNameForEdit("");
-                  }}
-                  style={styles.CancelButtonStyle}
-                >
-                  <Ionicons name="close" size={24} color="white" />
-                  <Text className="text-white ml-2 text-lg text-semibold">
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
+                <View className=" gap-2">
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsEditingCollection(false);
+                      handleEditCollection();
+                    }}
+                    style={styles.NormalButtonStyle}
+                  >
+                    <Ionicons name="save" size={24} color="white" />
+                    <Text className="text-white ml-2 text-lg text-semibold">
+                      Save Changes
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsEditingCollection(false);
+                      setEditingCollectionId(null);
+                      setNewCollectionNameForEdit("");
+                    }}
+                    style={styles.CancelButtonStyle}
+                  >
+                    <Ionicons name="close" size={24} color="white" />
+                    <Text className="text-white ml-2 text-lg text-semibold">
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          )}
+            </BlurView>
+          </Modal>
 
-          {editingYearId && (
-            <View className="mt-4 p-5">
-              <TextInput
-                placeholder="Edit year name"
-                className="border p-2 rounded mb-2"
-                value={newYearNameForEdit}
-                onChangeText={setNewYearNameForEdit}
-              />
+          {/* MODAL FOR EDITING YEAR */}
+          <Modal
+            visible={isEditingYear}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setIsEditingYear(false)}
+          >
+            <BlurView
+              intensity={100}
+              className="flex-1 justify-center items-center"
+            >
+              <View className="bg-blue-100 p-6 rounded-lg w-4/5 shadow-md">
+                <Text className="text-xl font-bold mb-3">Edit Year</Text>
 
-              <View className="flex justify-between items-center gap-2">
-                <TouchableOpacity
-                  onPress={handleEditYear}
-                  style={styles.NormalButtonStyle}
-                >
-                  <Ionicons name="save" size={24} color="white" />
-                  <Text className="text-white ml-2 text-lg text-semibold">
-                    Save Changes
-                  </Text>
-                </TouchableOpacity>
+                <TextInput
+                  placeholder="Edit year name"
+                  className="border p-2 rounded mb-2"
+                  value={newYearNameForEdit}
+                  onChangeText={setNewYearNameForEdit}
+                />
 
-                <TouchableOpacity
-                  onPress={() => {
-                    setEditingYearId(null);
-                    setNewYearNameForEdit("");
-                  }}
-                  style={styles.CancelButtonStyle}
-                >
-                  <Ionicons name="close" size={24} color="white" />
-                  <Text className="text-white ml-2 text-lg text-semibold">
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
+                <View className="gap-2">
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsEditingYear(false);
+                      handleEditYear();
+                    }}
+                    style={styles.NormalButtonStyle}
+                  >
+                    <Ionicons name="save" size={24} color="white" />
+                    <Text className="text-white ml-2 text-lg text-semibold">
+                      Save Changes
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsEditingYear(false);
+                      setEditingYearId(null);
+                      setNewYearNameForEdit("");
+                    }}
+                    style={styles.CancelButtonStyle}
+                  >
+                    <Ionicons name="close" size={24} color="white" />
+                    <Text className="text-white ml-2 text-lg text-semibold">
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          )}
+            </BlurView>
+          </Modal>
         </View>
       </ScrollView>
     </SafeAreaView>

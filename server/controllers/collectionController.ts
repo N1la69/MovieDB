@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/User";
 import Collection from "../models/Collection";
+import Year from "../models/Year";
 
 interface AuthenticatedRequest extends Request {
   user?: any;
@@ -102,6 +103,8 @@ export const deleteCollection = async (
       res.status(404).json({ message: "User not found" });
       return;
     }
+
+    await Year.deleteMany({ collectionId });
 
     user.collections = user.collections.filter(
       (col) => col.toString() !== collectionId

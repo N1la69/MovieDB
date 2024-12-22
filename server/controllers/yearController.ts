@@ -78,9 +78,11 @@ export const getCollectionYears = async (
 export const editYear = async (req: Request, res: Response): Promise<void> => {
   const { yearId, newYear } = req.body;
 
-  if (!yearId || !newYear) {
-    res.status(400).json({ message: "Year ID and new year are required" });
+  if (!yearId) {
+    res.status(400).json({ message: "Year ID are required" });
     return;
+  } else if (!newYear) {
+    res.status(400).json({ message: "New year is required" });
   }
 
   try {
