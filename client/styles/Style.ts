@@ -4,6 +4,7 @@ export const styles = StyleSheet.create({
   ColorContainer: {
     flex: 1,
     backgroundColor: "#D5E4F1",
+    paddingBottom: 85,
   },
   SearchBarStyle: {
     backgroundColor: "white",

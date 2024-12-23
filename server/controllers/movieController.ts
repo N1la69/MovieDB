@@ -24,6 +24,29 @@ export const getAllMovies = async (
   }
 };
 
+export const getMoviesByYear = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { yearId } = req.params;
+
+  try {
+    const movies = await Movie.find({ year: yearId }).populate("yearId");
+
+    if (!movies || movies.length === 0) {
+      res
+        .status(404)
+        .json({ error: "No movies found for the specified year." });
+      return;
+    }
+
+    res.status(200).json({ movies });
+  } catch (error) {
+    console.error("Error fetching movies by year (controller):", error);
+    res.json({ error: "Server error. Could not fetch movies by year." });
+  }
+};
+
 export const addMovie = async (req: Request, res: Response): Promise<void> => {
   try {
     const {

@@ -13,6 +13,7 @@ export interface IMovie extends Document {
   createdAt?: Date;
   updatedAt?: Date;
   rating?: number;
+  yearId: mongoose.Types.ObjectId;
 }
 
 // Movie Schema
@@ -27,6 +28,7 @@ const MovieSchema: Schema = new Schema(
     language: { type: String, required: true },
     posterUrl: { type: String, required: true },
     rating: { type: Number, min: 0, max: 10 },
+    yearId: { type: Schema.Types.ObjectId, required: true, ref: "Year" },
   },
   {
     timestamps: true,

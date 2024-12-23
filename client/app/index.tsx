@@ -392,6 +392,7 @@ const Home = () => {
             <BlurView
               intensity={100}
               className="flex-1 justify-center items-center"
+              tint="dark"
             >
               <View className="bg-blue-100 p-6 rounded-lg w-4/5 shadow-md">
                 <Text className="text-xl font-bold mb-4">
