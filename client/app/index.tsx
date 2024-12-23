@@ -6,7 +6,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { BlurView } from "expo-blur";
 import {
-  Button,
   FlatList,
   Text,
   TextInput,
@@ -17,6 +16,7 @@ import {
   Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 
 const Home = () => {
   const { user } = useAuth();
@@ -39,31 +39,51 @@ const Home = () => {
   const [newYearNameForEdit, setNewYearNameForEdit] = useState("");
   const [isEditingYear, setIsEditingYear] = useState(false);
 
-  // COLLECTION FUNCTIONS
   useEffect(() => {
-    const fetchCollections = async () => {
+    const fetchCollectionsAndYears = async () => {
+      if (!user?.id) return;
+
       try {
-        if (user?.id) {
-          const response = await api.get(`/collections/${user?.id}`, {
-            headers: {
-              authorization: `Bearer ${user?.token}`,
-            },
-          });
-          setCollections(response.data.collections);
-        }
+        const collectionsResponse = await api.get(`/collections/${user.id}`, {
+          headers: {
+            authorization: `Bearer ${user.token}`,
+          },
+        });
+        setCollections(collectionsResponse.data.collections);
+
+        const yearsPromises = collectionsResponse.data.collections.map(
+          async (collection: any) => {
+            const yearsResponse = await api.get(`/years/${collection._id}`, {
+              headers: {
+                authorization: `Bearer ${user.token}`,
+              },
+            });
+            return {
+              collectionId: collection._id,
+              years: yearsResponse.data.years,
+            };
+          }
+        );
+
+        const yearsData = await Promise.all(yearsPromises);
+        const yearsMap = yearsData.reduce((acc, { collectionId, years }) => {
+          acc[collectionId] = years;
+          return acc;
+        }, {});
+
+        setYears(yearsMap);
       } catch (error: any) {
         console.error(
-          "Failed to fetch collections (index):",
-          error.response?.data || error
+          "Failed to fetch collections and years:",
+          error.response?.data || error.message || error
         );
       }
     };
 
-    if (user?.id) {
-      fetchCollections();
-    }
+    fetchCollectionsAndYears();
   }, [user?.id]);
 
+  // COLLECTION FUNCTIONS
   const handleCreateCollection = async () => {
     if (newCollectionName.trim()) {
       try {
@@ -158,32 +178,6 @@ const Home = () => {
   };
 
   // YEAR FUNCTIONS
-  useEffect(() => {
-    const fetchYears = async () => {
-      if (!activeDropdown) return;
-
-      try {
-        const response = await api.get(`/years/${activeDropdown}`, {
-          headers: {
-            authorization: `Bearer ${user?.token}`,
-          },
-        });
-
-        setYears((prevYears) => ({
-          ...prevYears,
-          [activeDropdown]: response.data.years,
-        }));
-      } catch (error: any) {
-        console.error(
-          "Failed to fetch years (index):",
-          error.response?.data || error
-        );
-      }
-    };
-
-    fetchYears();
-  }, [activeDropdown]);
-
   const handleAddYear = async () => {
     if (!activeDropdown) return;
 
@@ -266,6 +260,7 @@ const Home = () => {
               </Text>
               <FlatList
                 data={collections}
+                nestedScrollEnabled={true}
                 keyExtractor={(item: any) => item._id + "1"}
                 renderItem={({ item }) => (
                   <View className="p-4 pt-6 mb-4 bg-gray-100 rounded-lg">
@@ -299,13 +294,15 @@ const Home = () => {
                       ) : (
                         <FlatList
                           data={years[item._id]}
+                          nestedScrollEnabled={true}
                           keyExtractor={(yearItem) => yearItem._id}
                           renderItem={({ item: yearItem }) => (
                             <TouchableOpacity
                               className="px-3 pt-3 pb-2 mb-2 bg-gray-400 rounded-2xl"
-                              onPress={() =>
-                                console.log("Year clicked:", yearItem._id)
-                              } // Handle year click left
+                              onPress={() => {
+                                console.log("Year clicked:", yearItem._id);
+                                router.push(`/(years)/${yearItem._id}`);
+                              }}
                             >
                               <View className="relative">
                                 <Text className="text-white text-2xl font-bold mb-2">

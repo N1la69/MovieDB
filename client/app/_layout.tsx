@@ -120,10 +120,11 @@ export default function RootLayout() {
             }}
           />
 
-          {/* Hide other routes like splash and (auth) */}
+          {/* Hide other routes  */}
           <Tabs.Screen name="splash" options={{ href: null }} />
           <Tabs.Screen name="(auth)" options={{ href: null }} />
           <Tabs.Screen name="(movies)/[id]" options={{ href: null }} />
+          <Tabs.Screen name="(years)/[yearId]" options={{ href: null }} />
         </Tabs>
       )}
     </SafeAreaProvider>
