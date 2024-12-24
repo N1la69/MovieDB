@@ -21,8 +21,9 @@ const YearPage = () => {
 
   const [movies, setMovies] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [movieData, setMovieData] = useState<any>(null);
 
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState("");
   const [cast, setCast] = useState<string[]>([]);
   const [duration, setDuration] = useState<number>(0);
@@ -50,25 +51,36 @@ const YearPage = () => {
     fetchMoviesByYear();
   }, [yearId]);
 
+  // MOVIE FUNCTIONS
   const handleAddMovie = async () => {
     try {
       const newMovie = {
-        title,
-        description,
-        cast,
-        duration,
-        releaseDate,
-        genre,
-        language,
-        posterUrl,
-        rating,
+        title: title,
+        description: description,
+        cast: cast,
+        duration: duration,
+        releaseDate: releaseDate,
+        genres: genre,
+        language: language,
+        posterUrl: posterUrl,
+        rating: rating,
         yearId: yearId,
       };
-
+      console.log(newMovie);
       const response = await api.post("/movies/add", newMovie);
 
       if (response.data) {
-        setIsAdding(false); // Close the modal after adding the movie
+        setIsAdding(false);
+        setMovieData(null);
+        setTitle("");
+        setDescription("");
+        setCast([]);
+        setDuration(0);
+        setReleaseDate("");
+        setGenre([]);
+        setLanguage("");
+        setPosterUrl("");
+        setRating(0);
       } else {
         console.error("Error adding movie [yearId]:", response.data);
       }
@@ -79,6 +91,40 @@ const YearPage = () => {
       );
     }
   };
+
+  const searchOMDB = async () => {
+    if (!title) return;
+
+    try {
+      const response = await api.get(`/movies/search-omdb?t=${title}}`);
+      if (response.data) {
+        setMovieData(response.data.movie);
+        console.log(movieData);
+      } else {
+        setMovieData(null);
+      }
+    } catch (error: any) {
+      console.error("Error searching movie:", error.response?.data || error);
+      setMovieData(null);
+    }
+  };
+
+  useEffect(() => {
+    if (title) searchOMDB();
+  }, [title]);
+
+  useEffect(() => {
+    if (movieData) {
+      setDescription(movieData.description || "");
+      setCast(movieData.cast || []);
+      setDuration(movieData.duration || 0);
+      setReleaseDate(movieData.releaseDate || "");
+      setGenre(movieData.genre || []);
+      setLanguage(movieData.language || "");
+      setPosterUrl(movieData.posterUrl || "");
+      setRating(movieData.rating || 0);
+    }
+  }, [movieData]);
 
   return (
     <SafeAreaView style={styles.ColorContainer}>
@@ -134,7 +180,7 @@ const YearPage = () => {
                 />
 
                 <TextInput
-                  value={description}
+                  value={movieData ? movieData.description : description}
                   onChangeText={setDescription}
                   placeholder="Description"
                   multiline
@@ -142,7 +188,11 @@ const YearPage = () => {
                 />
 
                 <TextInput
-                  value={cast.join(", ")}
+                  value={
+                    movieData && movieData.cast && Array.isArray(movieData.cast)
+                      ? movieData.cast.join(", ")
+                      : cast.join(", ")
+                  }
                   onChangeText={(text) =>
                     setCast(text.split(", ").map((item) => item.trim()))
                   }
@@ -151,7 +201,9 @@ const YearPage = () => {
                 />
 
                 <TextInput
-                  value={String(duration)}
+                  value={
+                    movieData ? String(movieData.duration) : String(duration)
+                  }
                   onChangeText={(text) => setDuration(Number(text))}
                   placeholder="Duration (in minutes)"
                   keyboardType="numeric"
@@ -159,14 +211,20 @@ const YearPage = () => {
                 />
 
                 <TextInput
-                  value={releaseDate}
+                  value={movieData ? movieData.releaseDate : releaseDate}
                   onChangeText={setReleaseDate}
                   placeholder="Release Date (YYYY-MM-DD)"
                   className="border border-gray-300 rounded-md p-2 mb-4"
                 />
 
                 <TextInput
-                  value={genre.join(", ")}
+                  value={
+                    movieData &&
+                    movieData.genre &&
+                    Array.isArray(movieData.genre)
+                      ? movieData.genre.join(", ")
+                      : genre.join(", ")
+                  }
                   onChangeText={(text) =>
                     setGenre(text.split(", ").map((item) => item.trim()))
                   }
@@ -175,21 +233,22 @@ const YearPage = () => {
                 />
 
                 <TextInput
-                  value={language}
+                  value={movieData ? movieData.language : language}
                   onChangeText={setLanguage}
                   placeholder="Language"
                   className="border border-gray-300 rounded-md p-2 mb-4"
                 />
 
                 <TextInput
-                  value={posterUrl}
+                  value={movieData ? movieData.posterUrl : posterUrl}
                   onChangeText={setPosterUrl}
                   placeholder="Poster URL"
+                  multiline
                   className="border border-gray-300 rounded-md p-2 mb-4"
                 />
 
                 <TextInput
-                  value={String(rating)}
+                  value={movieData ? movieData.rating : String(rating)}
                   onChangeText={(text) => setRating(Number(text))}
                   placeholder="Your Rating (0-10)"
                   keyboardType="numeric"
@@ -210,6 +269,7 @@ const YearPage = () => {
                   <TouchableOpacity
                     onPress={() => {
                       setIsAdding(false);
+                      setMovieData(null);
                       setTitle("");
                       setDescription("");
                       setCast([]);

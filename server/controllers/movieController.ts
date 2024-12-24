@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import axios from "axios";
 import Movie, { IMovie } from "../models/Movie";
 
-const OMDB_API_KEY = process.env.OMDB_API_KEY;
+const OMDB_API_KEY = process.env.OMDB_API_KEY || "765cc0c1";
 const OMDB_API_URL = "http://www.omdbapi.com/";
 
 export const getAllMovies = async (
@@ -31,7 +31,9 @@ export const getMoviesByYear = async (
   const { yearId } = req.params;
 
   try {
-    const movies = await Movie.find({ year: yearId }).populate("yearId");
+    const movies = await Movie.find({ yearId: yearId }).populate("yearId");
+
+    console.log(movies);
 
     if (!movies || movies.length === 0) {
       res
@@ -59,6 +61,7 @@ export const addMovie = async (req: Request, res: Response): Promise<void> => {
       language,
       posterUrl,
       rating,
+      yearId,
     } = req.body;
 
     if (!title || !genres || !Array.isArray(genres) || genres.length === 0) {
@@ -108,12 +111,16 @@ export const addMovie = async (req: Request, res: Response): Promise<void> => {
           language: apiData.Language || language || "Unknown",
           posterUrl: apiData.Poster || posterUrl || "",
           rating: rating !== undefined ? parseFloat(rating.toString()) : 0.0,
+          yearId,
         };
       } else {
         apiError = true;
       }
     } catch (error: any) {
-      console.warn("Error fetching movie details from API:", error.message);
+      console.warn(
+        "Error fetching movie details from API:",
+        error.response?.data || error
+      );
       apiError = true;
     }
 
@@ -128,6 +135,7 @@ export const addMovie = async (req: Request, res: Response): Promise<void> => {
         language: language || "Unknown",
         posterUrl: posterUrl || "",
         rating: rating !== undefined ? parseFloat(rating.toString()) : 0.0,
+        yearId,
       };
     }
 
@@ -200,5 +208,54 @@ export const deleteMovie = async (
     res
       .status(500)
       .json({ error: "An unexpected error occurred. Please try again later." });
+  }
+};
+
+export const searchMovieOMDB = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { t } = req.query;
+  //console.log(t);
+
+  if (!t || typeof t !== "string") {
+    res
+      .status(400)
+      .json({ message: "Please provide a movie title to search." });
+    return;
+  }
+
+  try {
+    const response = await axios.get(OMDB_API_URL, {
+      params: {
+        t: t,
+        apiKey: OMDB_API_KEY,
+      },
+    });
+
+    const apiData = response.data;
+
+    if (apiData.Response === "True") {
+      const movieDetails = {
+        title: apiData.Title,
+        description: apiData.Plot || "No description available.",
+        cast: apiData.Actors ? apiData.Actors.split(", ") : [],
+        duration: parseInt(apiData.Runtime) || 0,
+        releaseDate: new Date(apiData.Released) || new Date(),
+        genre: apiData.Genre ? apiData.Genre.split(", ") : [],
+        language: apiData.Language || "Unknown",
+        posterUrl: apiData.Poster || "",
+        rating: 0.0,
+      };
+      res.status(200).json({ movie: movieDetails });
+    } else {
+      res.status(404).json({ message: "Movie not found." });
+    }
+  } catch (error: any) {
+    console.error(
+      "Error fetching data from OMDB API:",
+      error.response?.data || error
+    );
+    res.status(500).json({ message: "Server error, please try again later." });
   }
 };
