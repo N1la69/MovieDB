@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import axios from "axios";
 import Movie, { IMovie } from "../models/Movie";
+import Year from "../models/Year";
+import { Types } from "mongoose";
 
 const OMDB_API_KEY = process.env.OMDB_API_KEY || "765cc0c1";
 const OMDB_API_URL = "http://www.omdbapi.com/";
@@ -140,6 +142,15 @@ export const addMovie = async (req: Request, res: Response): Promise<void> => {
     }
 
     const newMovie = await Movie.create(movieData);
+
+    const year = await Year.findById(yearId);
+    if (!year) {
+      res.status(404).json({ error: "Year not found." });
+      return;
+    }
+
+    year.movies.push(newMovie._id as Types.ObjectId);
+    await year.save();
     res
       .status(201)
       .json({ message: "Movie added successfully!", movie: newMovie });

@@ -12,16 +12,19 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const YearPage = () => {
   const searchParams = useSearchParams();
   const yearId = searchParams.get("yearId");
+  const [year, setYear] = useState<string | any>(null);
 
   const [movies, setMovies] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [movieData, setMovieData] = useState<any>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState("");
@@ -34,20 +37,35 @@ const YearPage = () => {
   const [rating, setRating] = useState<number>(0.0);
 
   useEffect(() => {
-    const fetchMoviesByYear = async () => {
+    const fetchYear = async () => {
+      if (!yearId) return;
+
       try {
-        if (yearId) {
-          const response = await api.get(`/movies/${yearId}`);
-          setMovies(response.data.movies);
-        }
+        const response = await api.get(`/years/year/${yearId}`);
+        setYear(response.data.year);
       } catch (error: any) {
-        console.log(
-          "Error fetching movies by year [yearId]:",
-          error.response?.data || error
-        );
+        console.error("Error fetching year:", error.response?.data || error);
       }
     };
 
+    fetchYear();
+  }, [yearId]);
+
+  const fetchMoviesByYear = async () => {
+    try {
+      if (yearId) {
+        const response = await api.get(`/movies/${yearId}`);
+        setMovies(response.data.movies);
+      }
+    } catch (error: any) {
+      console.log(
+        "Error fetching movies by year [yearId]:",
+        error.response?.data || error
+      );
+    }
+  };
+
+  useEffect(() => {
     fetchMoviesByYear();
   }, [yearId]);
 
@@ -70,6 +88,7 @@ const YearPage = () => {
       const response = await api.post("/movies/add", newMovie);
 
       if (response.data) {
+        fetchMoviesByYear();
         setIsAdding(false);
         setMovieData(null);
         setTitle("");
@@ -104,7 +123,8 @@ const YearPage = () => {
         setMovieData(null);
       }
     } catch (error: any) {
-      console.error("Error searching movie:", error.response?.data || error);
+      console.log("Error searching movie:", error.response?.data || error);
+      setFormError(error.response?.data || error);
       setMovieData(null);
     }
   };
@@ -141,7 +161,38 @@ const YearPage = () => {
             </Text>
           ) : (
             <View>
-              <Text>Year Page: {yearId}</Text>
+              <Text className="text-center font-bold text-3xl py-4">
+                Year: {year}
+              </Text>
+
+              <FlatList
+                data={movies}
+                keyExtractor={(item) => item._id}
+                nestedScrollEnabled={true}
+                renderItem={({ item, index }) => {
+                  return (
+                    <View className="p-4 bg-gray-100 rounded-lg mb-2">
+                      <View className="relative">
+                        <Text className="text-lg font-bold">
+                          {index + 1}. {item.title} -- [{item.rating}/10]
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => {
+                            console.log(item._id);
+                          }}
+                          className="absolute right-2 top-0"
+                        >
+                          <Ionicons
+                            name="information-circle-outline"
+                            size={25}
+                            color="blue"
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  );
+                }}
+              />
             </View>
           )}
 
@@ -179,6 +230,10 @@ const YearPage = () => {
                   className="border border-gray-300 rounded-md p-2 mb-4"
                 />
 
+                {formError && (
+                  <Text className="text-red-500 my-2">{formError}</Text>
+                )}
+
                 <TextInput
                   value={movieData ? movieData.description : description}
                   onChangeText={setDescription}
@@ -198,6 +253,7 @@ const YearPage = () => {
                   }
                   placeholder="Cast (comma separated)"
                   className="border border-gray-300 rounded-md p-2 mb-4"
+                  multiline
                 />
 
                 <TextInput

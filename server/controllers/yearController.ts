@@ -47,6 +47,24 @@ export const createYear = async (
   }
 };
 
+export const getYearById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { yearId: id } = req.params;
+    const year = await Year.findById(id);
+    if (!year) {
+      res.status(404).json({ message: "Year not found" });
+      return;
+    }
+    res.status(200).json({ year: year.year });
+  } catch (error) {
+    console.error("Error fetching year by ID:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 export const getCollectionYears = async (
   req: Request,
   res: Response
